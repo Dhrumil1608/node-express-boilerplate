@@ -4,9 +4,18 @@ node_modules
 # yarn error logs
 yarn-error.log
 
-# Environment varibales
+# Environment variables
 .env*
 !.env*.example
 
 # Code coverage
 coverage
+
+# Terraform local files and sensitive state
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/terraform.tfvars
+terraform/tfplan*
+terraform/crash.log
+terraform/crash.*.log
