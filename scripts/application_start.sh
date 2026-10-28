@@ -1,16 +1,32 @@
+
 #!/bin/bash
 set -euo pipefail
 
-cd /opt/node-express-cicd
+APP_DIR="/opt/node-express-cicd"
+SERVICE_NAME="aws-native-cicd-demo"
 
-# Stop an existing version if present.
-sudo -u ubuntu -H bash -lc \
-  'cd /opt/node-express-cicd && ./node_modules/.bin/pm2 delete aws-native-cicd-demo >/dev/null 2>&1 || true'
+# Create a systemd service for the Node.js application.
+cat > "/etc/systemd/system/${SERVICE_NAME}.service" <<EOF
+[Unit]
+Description=AWS Native CI/CD Demo Node.js Application
+After=network.target
 
-# Start the deployed app with PM2.
-sudo -u ubuntu -H bash -lc \
-  'cd /opt/node-express-cicd && ./node_modules/.bin/pm2 start ecosystem.config.json --update-env'
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=${APP_DIR}
+Environment=NODE_ENV=production
+Environment=PORT=3000
+ExecStart=/usr/bin/node ${APP_DIR}/demo-server.js
+Restart=on-failure
+RestartSec=5
 
-# Save the current PM2 process list.
-sudo -u ubuntu -H bash -lc \
-  'cd /opt/node-express-cicd && ./node_modules/.bin/pm2 save'
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable "${SERVICE_NAME}"
+systemctl restart "${SERVICE_NAME}"
+
+echo "Application service started successfully."
