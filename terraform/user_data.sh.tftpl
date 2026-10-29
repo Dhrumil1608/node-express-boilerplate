@@ -1,0 +1,31 @@
+#!/bin/bash
+set -euxo pipefail
+
+apt-get update
+
+DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  ruby-full wget curl unzip awscli
+
+cd /home/ubuntu
+
+wget -q \
+  https://aws-codedeploy-${aws_region}.s3.${aws_region}.amazonaws.com/latest/install \
+  -O codedeploy-install
+
+chmod +x codedeploy-install
+./codedeploy-install auto
+
+systemctl enable codedeploy-agent
+systemctl restart codedeploy-agent
+
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+
+DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs
+npm install -g pm2
+
+cat > /etc/node-express-cicd.env <<'ENVVARS'
+AWS_REGION=${aws_region}
+DB_PASSWORD_SECRET_ARN=${secret_arn}
+ENVVARS
+
+chmod 600 /etc/node-express-cicd.env
