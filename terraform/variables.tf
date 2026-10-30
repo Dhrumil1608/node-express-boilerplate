@@ -45,3 +45,15 @@ variable "db_password_dummy" {
   sensitive   = true
   default     = "DemoOnly-ChangeMe-2026"
 }
+
+variable "availability_zone_a" {
+  description = "Availability Zone for the first public subnet"
+  type        = string
+  default     = "ap-south-1a"
+}
+
+variable "availability_zone_b" {
+  description = "Availability Zone for the second public subnet"
+  type        = string
+  default     = "ap-south-1b"
+}

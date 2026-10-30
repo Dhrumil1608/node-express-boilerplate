@@ -8,7 +8,7 @@ resource "aws_s3_bucket" "artifacts" {
   bucket = "node-express-cicd-artifacts-${data.aws_caller_identity.current.account_id}-${random_id.suffix.hex}"
 
   # Prevent accidental bucket deletion while the project is active.
-  force_destroy = false
+  force_destroy = true
 
   tags = {
     Project = "node-express-cicd"

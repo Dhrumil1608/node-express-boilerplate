@@ -439,3 +439,103 @@ Contributions are more than welcome! Please check out the [contributing guide](C
 
 [MIT](LICENSE)
 
+
+## AWS-Native CI/CD Deployment
+
+This project includes an AWS-native CI/CD pipeline that automatically builds and deploys the Node.js application to an EC2 instance whenever changes are pushed to the `main` branch.
+
+### Architecture
+
+- **Amazon VPC:** Provides the network infrastructure and public subnets.
+- **Amazon EC2:** Hosts the Node.js application on Ubuntu.
+- **AWS IAM:** Provides permissions for EC2, CodeBuild, CodeDeploy and CodePipeline.
+- **AWS Secrets Manager:** Stores the demo database password securely.
+- **Amazon S3:** Stores CodePipeline build artifacts.
+- **AWS CodeBuild:** Builds and prepares the application.
+- **AWS CodeDeploy:** Deploys the application to EC2.
+- **AWS CodePipeline:** Automates the source, build and deployment stages.
+- **PM2:** Manages the Node.js application process and restart behavior.
+
+### Prerequisites
+
+Install and configure:
+
+- AWS CLI
+- Terraform
+- Git
+- A GitHub account with access to this repository
+- An AWS account with the required permissions
+
+### Terraform Setup
+
+Open a terminal in the repository root and navigate to the Terraform directory:
+
+```bash
+cd terraform
+```
+
+Initialize Terraform:
+
+```bash
+terraform init
+```
+
+Format and validate the configuration:
+
+```bash
+terraform fmt
+terraform validate
+```
+
+Review the execution plan:
+
+```bash
+terraform plan
+```
+
+Review all proposed infrastructure changes before applying them:
+
+```bash
+terraform apply
+```
+
+Terraform may ask for the required input variables, including the SSH access CIDR. Supply values appropriate for your environment. Do not commit `terraform.tfvars` or credentials to GitHub.
+
+### GitHub Connection Approval
+
+After Terraform creates the CodeStar connection, it may initially have a `PENDING` status.
+
+Complete the connection manually:
+
+1. Open the AWS Management Console.
+2. Navigate to **Developer Tools → Settings → Connections**.
+3. Select the GitHub connection created by Terraform.
+4. Choose **Update pending connection** or the equivalent action.
+5. Complete the GitHub authorization flow.
+6. Confirm that the connection status becomes **AVAILABLE**.
+
+The pipeline can retrieve source code from GitHub after the connection is authorized.
+
+### CI/CD Workflow
+
+After setup, pushing a commit to the configured `main` branch triggers the pipeline:
+
+1. **Source:** CodePipeline retrieves the latest GitHub source.
+2. **Build:** CodeBuild installs dependencies and prepares the deployment artifact.
+3. **Deploy:** CodeDeploy transfers the application to the EC2 instance and executes the deployment lifecycle scripts.
+4. **Process management:** PM2 starts or reloads the Node.js application under the `ubuntu` user.
+
+### Application Endpoints
+
+Replace these placeholders with the public EC2 address assigned to your deployment:
+
+- Application: `http://<EC2-PUBLIC-IP>:3000/`
+- Health check: `http://<EC2-PUBLIC-IP>:3000/health`
+
+### Important Notes
+
+- The demo secret is intended for learning and testing, not production database credentials.
+- Keep Terraform state files, plan files, credentials and `terraform.tfvars` out of version control.
+- The S3 `force_destroy` setting is enabled for testing. It can allow deletion of a non-empty artifact bucket.
+- The Secrets Manager recovery window is set to zero for testing. Secret deletion can therefore be permanent.
+- Always review Terraform plans before applying changes.

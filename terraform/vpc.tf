@@ -25,7 +25,7 @@ resource "aws_internet_gateway" "main" {
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.20.1.0/24"
-  availability_zone       = "ap-south-1a"
+  availability_zone       = var.availability_zone_a
   map_public_ip_on_launch = true
 
   tags = {
@@ -56,7 +56,7 @@ resource "aws_route_table_association" "public" {
 resource "aws_subnet" "public_b" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.20.2.0/24"
-  availability_zone       = "ap-south-1b"
+  availability_zone       = var.availability_zone_b
   map_public_ip_on_launch = true
 
   tags = {
